@@ -9,7 +9,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.pagination import PageNumberPagination
 from apps.core.models import App, Purchase
 from apps.core.serializers import AppReadSerializer, UploadedIconSerializer, AppCreateSerializer, \
-    AppUpdateSerializer, PurchaseSerializer
+    AppUpdateSerializer, PurchaseReadSerializer, PurchaseWriteSerializer
 
 
 class PaginatorMixin:
@@ -85,24 +85,21 @@ class VerifiedAppsView(generics.ListAPIView):
 
 class PurchaseViewsets(viewsets.ViewSet, PaginatorMixin):
     def list(self, request):
-        qs = Purchase.objects.filter(issued_by=self.request.user)
-        return self.paginate(qs, request, PurchaseSerializer)
+        qs = Purchase.objects.filter(issued_by=self.request.user).select_related('app')
+        return self.paginate(qs, request, PurchaseReadSerializer)
 
     def retrieve(self, request, pk=None):
-        pass
+        qs = Purchase.objects.filter(pk=pk, issued_by=self.request.user).select_related('app')
+        obj = get_object_or_404(qs, pk=pk)
+        serializer = PurchaseReadSerializer(obj)
+        return Response(serializer.data)
 
     def create(self, request):
-        request.data['user'] = self.request.user.id
-        return Response(status=status.HTTP_201_CREATED)
-
-# class PurchasedAppsView(generics.ListAPIView):
-#     def paginate_queryset(self, queryset):
-#         return None
-#
-#
-# class PurchasedAppDetailView(generics.GenericAPIView):
-#     def get(self, request, pk):
-#         return Response(status=200)
+        request.data['issued_by'] = self.request.user.id
+        serializer = PurchaseWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        purchase = serializer.save()
+        return Response(status=status.HTTP_200_OK, data=AppReadSerializer(instance=purchase.app).data)
 
 
 class Upload(APIView):
