@@ -39,6 +39,8 @@ Rename `.env-template` file to `.env` and fill the variables with proper values
 ### Start the project
     docker-compose up -d
     
+### Logs
+All logs exist in `./logs` folder.
 
 ## Build instructions without Docker
 ### Clone source code
