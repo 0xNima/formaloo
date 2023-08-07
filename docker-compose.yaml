@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+    appstore:
+      build: .
+      container_name: formaloo-appstore
+      restart: always
+      depends_on:
+        - postgresql
+      links:
+        - postgresql:postgresql
+      command: bash -c "python manage.py create_db &&
+                        python manage.py makemigrations &&
+                        python manage.py migrate &&
+                        python manage.py create_superuser &&
+                        python manage.py collectstatic --noinput &&
+                        gunicorn appstore.wsgi:application --workers 4 --bind 0.0.0.0:8000 --error-logfile /var/log/appstore/gunicorn-error.log --access-logfile /var/log/appstore/gunicorn-access.log --access-logformat \"%(h)s %(l)s %(t)s '%(r)s' %(s)s %(b)s '%(f)s' '%(a)s'\""
+      ports:
+        - "127.0.0.1:8000:${SERVICE_PORT}/tcp"
+      environment:
+        DB_HOST: postgresql
+        LOG_FILE: '/var/log/appstore/django.log'
+      volumes:
+        - .:/app/
+        - ./logs:/var/log/appstore/
+    postgresql:
+        image: postgres:latest
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: ${DB_PASS}
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_DB: ${DB_NAME}
+            POSTGRES_INITDB_ARGS: "--encoding='UTF8' --lc-collate='C' --lc-ctype='C'"
+        volumes:
+            - ./db:/var/lib/postgresql/data/
