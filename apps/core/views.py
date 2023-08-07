@@ -159,7 +159,8 @@ class PurchaseViewsets(viewsets.ViewSet, PaginatorMixin):
         operation_description="Retrieve the purchase detail",
         responses={
             status.HTTP_200_OK: PurchaseReadSerializer,
-            status.HTTP_400_BAD_REQUEST: CustomSchemes.not_found
+            status.HTTP_404_NOT_FOUND: CustomSchemes.not_found,
+            status.HTTP_400_BAD_REQUEST: CustomSchemes.self_purchase
         },
         operation_id="retrieve purchase"
     )

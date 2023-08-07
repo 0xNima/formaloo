@@ -26,3 +26,10 @@ class CustomSchemes:
             "detail": openapi.Schema(type=openapi.TYPE_STRING)
         }
     )
+
+    self_purchase = openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "detail": openapi.Schema(type=openapi.TYPE_STRING)
+        }
+    )

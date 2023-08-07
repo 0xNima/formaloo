@@ -1,6 +1,15 @@
 import os
 
 from datetime import timedelta
+from pathlib import Path
+from dotenv import load_dotenv
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv()
+
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 
 ALLOWED_HOSTS = ['*']
@@ -71,6 +80,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -124,14 +140,10 @@ SWAGGER_SETTINGS = {
    },
 }
 
-if os.environ.get('PRODUCTION'):
+if os.environ.get('PRODUCTION', '').lower() == 'yes':
     from appstore.settings.production import *
 else:
-    if os.environ.get('LOAD_DOT_ENV', True):
-        from dotenv import load_dotenv
-        load_dotenv()
     from appstore.settings.development import *
-
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
@@ -141,7 +153,7 @@ SIMPLE_JWT = {
     'UPDATE_LAST_LOGIN': False,
 
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': JWT_SECRET,
+    'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
     'AUDIENCE': None,
     'ISSUER': None,

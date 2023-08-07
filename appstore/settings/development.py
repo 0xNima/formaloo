@@ -1,18 +1,16 @@
-from pathlib import Path
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = 'hard2detect-key'
+import os
 
 DEBUG = True
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+
+if os.getenv('LITE_DB', '').lower() == 'no':
+    DATABASES = {
+        'default': {
+            "ENGINE": "django.db.backends.postgresql",
+            "HOST": os.getenv('DB_HOST'),
+            "USER": os.getenv('DB_USER'),
+            "NAME": os.getenv('DB_NAME'),
+            "PASSWORD": os.getenv('DB_PASS'),
+            "PORT": int(os.getenv('DB_PORT')),
+        }
     }
-}
-
-
-JWT_SECRET = SECRET_KEY
