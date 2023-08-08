@@ -1,78 +1,74 @@
-from rest_framework.test import APITestCase
-from rest_framework.reverse import reverse
+from django.contrib.auth.models import User
+from django.test import RequestFactory, override_settings
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
+from mixer.backend.django import mixer
+from apps.core.models import App
+from apps.core.views import AppViewsets
+from apps.core.serializers import AppCreateSerializer
+from apps.authenticate.tests import WithAuthTestCase
 
 
-class WithAuthTestCase(APITestCase):
-    register_url = reverse('auth_register')
-    login_url = reverse('token_obtain_pair')
-    token_refresh = reverse('token_refresh')
-    logout_url = reverse('logout')
+class TestAppViewset(WithAuthTestCase):
+    PAGE_SIZE = 5
 
-    def auth_request(self, path, data):
-        response = self.client.post(path, data=data)
-        body = None
+    def setUp(self) -> None:
+        with mixer.ctx(commit=False) as mx:
+            user = mx.blend(User, active=True)
+            self.tokens = self.get_token({
+                'username': user.username,
+                'email': user.email,
+                'password': user.password,
+                'password_confirmation': user.password,
+            })
 
-        try:
-            body = response.json()
-        except TypeError:
-            pass
+            self.user = User.objects.get(username=user.username)
 
-        return response.status_code, body
+            self.requester = RequestFactory(headers={
+                'Authorization': f'JWT {self.tokens["access"]}'
+            })
 
+    @override_settings(PAGE_SIZE=PAGE_SIZE)
+    def test_applist(self):
+        object_count = 10
+        mixer.cycle(count=object_count).blend(App, user=self.user)
+        request = self.requester.get('apps/')
+        response = AppViewsets.as_view({'get': 'list'})(request)
 
-class TestLoginCase(WithAuthTestCase):
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            len(response.data['results']), self.PAGE_SIZE
+        )
+        self.assertEqual(response.data['count'], object_count)
+        self.assertTrue(response.data['next'] is not None)
+        self.assertTrue(response.data['previous'] is None)
 
-    register_url = reverse('auth_register')
-    login_url = reverse('token_obtain_pair')
-    token_refresh = reverse('token_refresh')
-    logout_url = reverse('logout')
+    def test_create_app(self):
+        with mixer.ctx(commit=False) as mx:
+            app = mx.blend(App, user=self.user, price=20)
+        request = self.requester.post('apps/', data=AppCreateSerializer(app).data, content_type='application/json')
+        response = AppViewsets.as_view({'post': 'create'})(request)
 
-    @classmethod
-    def setUpTestData(cls):
-        cls.data = {
-            "username": "username",
-            "password": "Us3rn@me",
-            "password_confirmation": "Us3rn@me",
-            "email": "username@gmail.com"
-        }
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['title'], app.title)
+        self.assertEqual(response.data['id'], 1)
 
-    def auth_request(self, path, data):
-        response = self.client.post(path, data=data)
-        body = None
+    def test_retrieve_app(self):
+        app = mixer.blend(App, user=self.user, price=20)
+        request = self.requester.get('apps/')
+        response = AppViewsets.as_view({'get': 'retrieve'})(request, pk=app.id)
 
-        try:
-            body = response.json()
-        except TypeError:
-            pass
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['title'], app.title)
+        self.assertEqual(response.data['access_key'], str(app.access_key))
+        self.assertEqual(response.data['id'], 1)
 
-        return response.status_code, body
+    def test_delete_app(self):
+        app = mixer.blend(App, user=self.user, price=20)
+        request = self.requester.delete('apps/')
+        response = AppViewsets.as_view({'delete': 'destroy'})(request, pk=app.id)
 
-    def test_register(self):
-        code, body = self.auth_request(self.register_url, self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.assertEqual(code, status.HTTP_201_CREATED)
-        self.assertEqual(body['username'], self.data['username'])
-        self.assertEqual(body['email'], self.data['email'])
-
-    def test_login(self):
-        _, body = self.auth_request(self.register_url, self.data)
-        code, tokens = self.auth_request(self.login_url, self.data)
-
-        self.assertEqual(code, status.HTTP_200_OK)
-        self.assertTrue('access' in tokens)
-        self.assertTrue('refresh' in tokens)
-
-    def test_logout(self):
-        _, body = self.auth_request(self.register_url, self.data)
-        _, tokens = self.auth_request(self.login_url, self.data)
-
-        self.client.credentials(HTTP_AUTHORIZATION=f"JWT {tokens.pop('access')}")
-
-        ok, _ = self.auth_request(self.logout_url, tokens)
-        err, _ = self.auth_request(self.logout_url, {'refresh': 'wrong-refresh-token'})
-        expired, _ = self.auth_request(self.logout_url, tokens)
-
-        self.assertEqual(ok, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(err, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(expired, status.HTTP_400_BAD_REQUEST)
+        with self.assertRaises(ObjectDoesNotExist):
+            App.objects.get(pk=app.id)
