@@ -1,7 +1,12 @@
 from django.contrib import admin
-from apps.core.models import App, Purchase, Wallet, UploadedIcon
+from apps.core.models import App
 
-admin.site.register(App)
-admin.site.register(Purchase)
-admin.site.register(Wallet)
-admin.site.register(UploadedIcon)
+
+class AppModelAdmin(admin.ModelAdmin):
+    list_display = ['title', 'verified', 'user']
+    list_filter = ['verified']
+    search_fields = ['title', 'user__username']
+
+
+admin.site.register(App, AppModelAdmin)
+
