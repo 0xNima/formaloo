@@ -17,7 +17,7 @@ class RegisterUserView(CreateAPIView):
     @swagger_auto_schema(
         operation_description='Signup new user',
         responses={
-            201: CustomSchemes.user
+            status.HTTP_201_CREATED: CustomSchemes.user
         },
         operation_id="register"
     )
@@ -45,6 +45,8 @@ class RefreshTokenView(TokenRefreshView):
         operation_description='Refresh access token',
         responses={
             status.HTTP_200_OK: CustomSchemes.token_pair,
+            status.HTTP_400_BAD_REQUEST: CustomSchemes.error,
+            status.HTTP_401_UNAUTHORIZED: CustomSchemes.error
         },
         operation_id="refresh token"
     )
@@ -58,7 +60,9 @@ class LogoutUserView(GenericAPIView):
     @swagger_auto_schema(
         operation_description='Logout',
         responses={
-            status.HTTP_204_NO_CONTENT: None,
+            status.HTTP_204_NO_CONTENT: '',
+            status.HTTP_400_BAD_REQUEST: CustomSchemes.error,
+            status.HTTP_401_UNAUTHORIZED: CustomSchemes.error
         },
         operation_id="logout"
     )

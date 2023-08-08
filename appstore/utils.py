@@ -22,14 +22,7 @@ class CustomSchemes:
         required=[]
     )
 
-    not_found = openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            "detail": openapi.Schema(type=openapi.TYPE_STRING)
-        }
-    )
-
-    self_purchase = openapi.Schema(
+    error = openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
             "detail": openapi.Schema(type=openapi.TYPE_STRING)

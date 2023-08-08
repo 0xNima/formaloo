@@ -34,7 +34,7 @@ class AppViewsets(viewsets.ViewSet, PaginatorMixin):
         operation_description="Retrieve the app",
         responses={
             status.HTTP_200_OK: AppReadSerializer,
-            status.HTTP_404_NOT_FOUND: CustomSchemes.not_found
+            status.HTTP_404_NOT_FOUND: CustomSchemes.error
         },
         operation_id="retrieve app"
     )
@@ -150,8 +150,8 @@ class PurchaseViewsets(viewsets.ViewSet, PaginatorMixin):
         operation_description="Retrieve the purchase detail",
         responses={
             status.HTTP_200_OK: PurchaseReadSerializer,
-            status.HTTP_404_NOT_FOUND: CustomSchemes.not_found,
-            status.HTTP_400_BAD_REQUEST: CustomSchemes.self_purchase
+            status.HTTP_404_NOT_FOUND: CustomSchemes.error,
+            status.HTTP_400_BAD_REQUEST: CustomSchemes.error
         },
         operation_id="retrieve purchase"
     )
