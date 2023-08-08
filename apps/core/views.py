@@ -6,22 +6,13 @@ from rest_framework.views import APIView
 from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.pagination import PageNumberPagination
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from apps.core.models import App, Purchase
 from apps.core.serializers import AppReadSerializer, UploadedIconSerializer, AppCreateSerializer, \
     AppUpdateSerializer, PurchaseReadSerializer, PurchaseWriteSerializer, AppPaginationSerializer, \
     VerifiedPaginationSerializer, PurchasePaginationSerializer
-from appstore.utils import CustomSchemes
-
-
-class PaginatorMixin:
-    def paginate(self, qs, request, serializer_class):
-        paginator = PageNumberPagination()
-        paginated_qs = paginator.paginate_queryset(qs, request)
-        serializer = serializer_class(paginated_qs, many=True)
-        return paginator.get_paginated_response(serializer.data)
+from appstore.utils import CustomSchemes, PaginatorMixin
 
 
 class AppViewsets(viewsets.ViewSet, PaginatorMixin):

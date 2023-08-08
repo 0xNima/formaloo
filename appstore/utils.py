@@ -1,3 +1,4 @@
+from rest_framework.pagination import PageNumberPagination
 from drf_yasg import openapi
 
 
@@ -33,3 +34,11 @@ class CustomSchemes:
             "detail": openapi.Schema(type=openapi.TYPE_STRING)
         }
     )
+
+
+class PaginatorMixin:
+    def paginate(self, qs, request, serializer_class):
+        paginator = PageNumberPagination()
+        paginated_qs = paginator.paginate_queryset(qs, request)
+        serializer = serializer_class(paginated_qs, many=True)
+        return paginator.get_paginated_response(serializer.data)
