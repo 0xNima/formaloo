@@ -59,6 +59,10 @@ change environment variables with appropriate values. You can see above for deta
     source venv/bin/activate
 
     pip install -r requirements.txt
+
+### Run tests
+    python manage.py test apps
+
 ### Create db and Run migrations
     python manage.py create_db && \
     python manage.py makemigrations && \
