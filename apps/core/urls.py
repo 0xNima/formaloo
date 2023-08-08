@@ -9,6 +9,4 @@ router.register(r'purchases', PurchaseViewsets, basename='purchases')
 
 urlpatterns = [
     path('apps/verified/', VerifiedAppsView.as_view()),
-    # path('apps/purchases/', PurchasedAppsView.as_view()),
-    # path('apps/purchases/<int:pk>', PurchasedAppDetailView.as_view()),
 ] + router.urls
