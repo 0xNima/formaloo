@@ -1,8 +1,10 @@
+from django.utils.text import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from apps.core.models import Wallet
 
 
@@ -45,3 +47,15 @@ class LoginUserSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['user_id'] = user.id
         return token
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    def save(self, **kwargs):
+        try:
+            RefreshToken(self.validated_data['refresh']).blacklist()
+        except TokenError:
+            raise serializers.ValidationError({"detail": _('Token is invalid or expired')})
+        except KeyError:
+            raise serializers.ValidationError({"detail": _("refresh field is required")})
