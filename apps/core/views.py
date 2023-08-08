@@ -105,6 +105,9 @@ class VerifiedAppsView(generics.ListAPIView):
         responses={
             status.HTTP_200_OK: VerifiedPaginationSerializer
         },
+        manual_parameters=[
+            openapi.Parameter('search', openapi.IN_QUERY, type='string', description='search item', required=False)
+        ],
         operation_id="verified apps"
     )
     def get(self, request, *args, **kwargs):
