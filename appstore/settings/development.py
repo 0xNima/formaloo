@@ -3,6 +3,9 @@ import os
 DEBUG = True
 
 
+PAGE_SIZE = 10
+
+
 if os.getenv('LITE_DB', '').lower() == 'no':
     DATABASES = {
         'default': {

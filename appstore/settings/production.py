@@ -3,6 +3,8 @@ import os
 
 DEBUG = False
 
+PAGE_SIZE = 100
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
