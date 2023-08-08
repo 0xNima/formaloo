@@ -45,6 +45,9 @@ class Purchase(WithDateTime):
     price = models.FloatField()
     unit = models.SmallIntegerField(choices=WALLET_UNITS, default=USD)
 
+    class Meta:
+        ordering = ['id']
+
 
 class Wallet(WithDateTime):
     balance = models.FloatField(default=0)
