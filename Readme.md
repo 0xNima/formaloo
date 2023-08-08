@@ -72,4 +72,5 @@ Navigate to http://localhost:8000/api/redoc/ to see the full documentation of AP
 
 ## Integration with Dashboard service
 Appstore can be integrated with any dashboard service for monitoring purposes. For decoupling this process from our system, we implemented an event-driven architecture. Appstore will publish metrics as JSON payloads through the event queues. On the other side, the Dashboard service will consume and use these events.
- 
+
+![Recommended Design](formaloo.drawio.png)
