@@ -50,11 +50,11 @@ All logs exist in `./logs` folder.
     cd formaloo/
 
     mv .env-template .env
-    
-[Fill as above](Readme.md#L15)
+
+change environment variables with appropriate values. You can see above for detail of each variable.
 
 ### Create Virtualenv and install prerequires
-    python3 -m virtualenv venv
+    python3 -m venv venv
 
     source venv/bin/activate
 
@@ -68,6 +68,8 @@ All logs exist in `./logs` folder.
     python manage.py runserver
 
 ## Documentations
-Navigate to http://localhost:8000/api/redoc/ to see full documentation of api.
+Navigate to http://localhost:8000/api/redoc/ to see the full documentation of API.
 
 ## Integration with Dashboard service
+Appstore can be integrated with any dashboard service for monitoring purposes. For decoupling this process from our system, we implemented an event-driven architecture. Appstore will publish metrics as JSON payloads through the event queues. On the other side, the Dashboard service will consume and use these events.
+ 
