@@ -53,7 +53,7 @@ All logs exist in `./logs` folder.
 
 change environment variables with appropriate values. You can see above for detail of each variable.
 
-### Create Virtualenv and install prerequires
+### Create Virtualenv and install prerequisite
     python3 -m venv venv
 
     source venv/bin/activate
